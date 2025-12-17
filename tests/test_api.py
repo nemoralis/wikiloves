@@ -7,30 +7,35 @@ import sys
 # Add parent directory to path to import app and other modules
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from app import app
 import data_store
 import functions
+
+current_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+data_file = os.path.join(current_path, "conf/db.dump.json")
+with open(data_file, "r") as f:
+    data_store.db = json.load(f)
+
+data_store.menu = functions.get_menu(data_store.db)
+data_store.events_data = functions.get_events_data(data_store.db)
+data_store.events_names = {slug: functions.get_event_name(slug) for slug in list(data_store.events_data.keys())}
+data_store.country_data = functions.get_country_data(data_store.db)
+
+original_loadDB = data_store.loadDB
+data_store.loadDB = lambda: None
+
+from app import app
 
 class TestApi(unittest.TestCase):
     def setUp(self):
         self.app = app.test_client()
-        current_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        data_file = os.path.join(current_path, "conf/db.dump.json")
-        with open(data_file, "r") as f:
-            data_store.db = json.load(f)
-        
-        # Initialize other data structures in data_store
-        data_store.menu = functions.get_menu(data_store.db)
-        data_store.events_data = functions.get_events_data(data_store.db)
-        data_store.events_names = {slug: functions.get_event_name(slug) for slug in list(data_store.events_data.keys())}
-        data_store.country_data = functions.get_country_data(data_store.db)
-        
-        # Mock loadDB to do nothing
-        self.original_loadDB = data_store.loadDB
-        data_store.loadDB = lambda: None
 
     def tearDown(self):
-        data_store.loadDB = self.original_loadDB
+        pass
+    
+    @classmethod
+    def tearDownClass(cls):
+        # Restore original loadDB after all tests complete
+        data_store.loadDB = original_loadDB
 
     def test_events(self):
         response = self.app.get("/api/events")
