@@ -22,8 +22,8 @@ dbquery = """SELECT
  FROM (SELECT
    cl_from
    FROM categorylinks
-   JOIN linktarget ON cl_target_id = lt_id
-   WHERE lt_title = %s AND cl_type = 'file') cats
+   WHERE cl_type = 'file'
+     AND cl_target_id = (SELECT lt_id FROM linktarget WHERE lt_title = %s AND lt_namespace = 14)) cats
  INNER JOIN page ON cl_from = page_id
  INNER JOIN image ON page_title = img_name
  LEFT JOIN oldimage ON image.img_name = oldimage.oi_name AND oldimage.oi_timestamp = (SELECT MIN(o.oi_timestamp) FROM oldimage o WHERE o.oi_name = image.img_name)
