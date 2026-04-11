@@ -20,10 +20,10 @@ dbquery = """SELECT
  COALESCE(user.user_name, actor.actor_id) as name,
  COALESCE(user_registration, "20050101000000") as user_registration
  FROM (SELECT
-   cl_to,
    cl_from
    FROM categorylinks
-   WHERE cl_to = %s AND cl_type = 'file') cats
+   JOIN linktarget ON cl_target_id = lt_id
+   WHERE lt_title = %s AND cl_type = 'file') cats
  INNER JOIN page ON cl_from = page_id
  INNER JOIN image ON page_title = img_name
  LEFT JOIN oldimage ON image.img_name = oldimage.oi_name AND oldimage.oi_timestamp = (SELECT MIN(o.oi_timestamp) FROM oldimage o WHERE o.oi_name = image.img_name)
