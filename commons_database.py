@@ -38,7 +38,8 @@ class DB:
         Tenta fazer a consulta, reconecta até 10 vezes até conseguir
         """
         loops = 0
-        self.connect()
+        if not hasattr(self, 'conn'):
+            self.connect()
         while True:
             try:
                 return self._query(*sql)
