@@ -48,6 +48,7 @@ class DB:
                     loops += 1
                     print("Erro no DB, esperando %ds antes de tentar de novo" % loops)
                     time.sleep(loops)
+                    self.connect()
                 else:
                     return self._query(*sql)
                     break
